@@ -133,7 +133,7 @@ try:
             print("Failed Video")
             break
 
-        small_frame = cv2.resize(frame, (0, 0), fx = 0.25, fy = 0.25)
+        small_frame = cv2.resize(frame, (0, 0), fx = 0.5, fy = 0.5)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
         face_locations = []
