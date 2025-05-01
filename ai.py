@@ -7,6 +7,7 @@ import numpy as np
 import uuid
 from matplotlib import pyplot as plt
 
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' 
 
 #Import Tensorflow (deep learning) dependencies
@@ -34,6 +35,8 @@ for imgnum in range(number_images):
 
     if cv2.waitKey(1) & 0XFF == ord('q'):
         break
+
+
 
 cv2.release()
 cv2.destroyAllWindows()
