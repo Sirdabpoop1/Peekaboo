@@ -2,41 +2,38 @@
 import cv2
 import os
 import time
-import random
 import numpy as np
 import uuid
+import json
 from matplotlib import pyplot as plt
+import albumentations as alb
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' 
-
-#Import Tensorflow (deep learning) dependencies
 import tensorflow as tf
-from tensorflow import keras
-from keras import layers, Model
+
 
 #Avoid out of memory errors by setting GPU growth
 gpus = tf.config.experimental.list_physical_devices("GPU")
 for gpu in gpus:
-    print(gpu)
     tf.config.experimental.set_memory_growth(gpu, True)
 
-IMAGES_PATH = os.path.join("data", "images")
-number_images = 30
+tf.config.list_physical_devices("GPU")
 
-cam = cv2.VideoCapture(0)
-for imgnum in range(number_images):
-    print("Collecting Image #{}".format(imgnum))
-    ret, frame = cam.read()
-    imgname = os.path.join(IMAGES_PATH, f"{str(uuid.uuid1())}.jpg")
-    cv2.imwrite(imgname, frame)
-    cv2.imshow("frame", frame)
-    time.sleep(0.5)
+images = tf.data.Dataset.list_files('data\\images\\*.jpg')
 
-    if cv2.waitKey(1) & 0XFF == ord('q'):
-        break
+def load_image(x):
+    byte_img = tf.io.read_file(x)
+    img = tf.io.decode_jpeg(byte_img)
+    return img
 
+images = images.map(load_image)
 
+image_gen = images.batch(4).as_numpy_iterator()
+plot_images = image_gen.next()
 
-cv2.release()
-cv2.destroyAllWindows()
+fig, ax = plt.subplots(ncols = 4, figsize = (20, 20))
+for idx, image in enumerate(plot_images):
+    ax[idx].imshow(image)
+plt.show()
