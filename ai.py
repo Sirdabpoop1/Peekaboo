@@ -56,9 +56,6 @@ test_labels = test_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uin
 val_labels = tf.data.Dataset.list_files('aug_data\\val\\labels\\*.json', shuffle = False)
 val_labels = val_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float16)))
 
-
-print(len(train_images), len(train_labels), len(test_images), len(test_labels), len(val_images), len(val_labels))
-
 train = tf.data.Dataset.zip((train_images, train_labels))
 train = train.shuffle(5000)
 train = train.batch(8)
@@ -73,3 +70,22 @@ val = tf.data.Dataset.zip((val_images, val_labels))
 val = val.shuffle(5000)
 val = val.batch(8)
 val = val.prefetch(4)
+
+data_samples = train.as_numpy_iterator()
+res = data_samples.next()
+
+fig, ax = plt.subplots(ncols = 4, figsize = (20,20))
+for idx in range (4):
+    sample_image = res[0][idx].copy()
+    sample_coords = res[1][1][idx]
+
+    cv2.rectangle(sample_image,
+                  tuple(np.multiply(sample_coords[:2], [120, 120]).astype(int)),
+                  tuple(np.multiply(sample_coords[2:], [120, 120]).astype(int)),
+                        (255, 0, 0), 2)
+    
+    ax[idx].imshow(sample_image)
+
+plt.show()
+
+vgg = tf.keras.applications.VGG16(include_top = False)
