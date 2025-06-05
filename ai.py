@@ -13,6 +13,15 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import tensorflow as tf
 
+Model = tf.keras.models.Model
+
+Input = tf.keras.layers.Input
+Conv2D = tf.keras.layers.Conv2D
+MaxPooling2D = tf.keras.layers.MaxPooling2D
+Dense = tf.keras.layers.Dense
+GlobalMaxPooling2D = tf.keras.layers.GlobalMaxPooling2D
+
+VGG16 = tf.keras.applications.VGG16
 
 #Avoid out of memory errors by setting GPU growth
 gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -87,5 +96,6 @@ for idx in range (4):
     ax[idx].imshow(sample_image)
 
 plt.show()
+
 
 vgg = tf.keras.applications.VGG16(include_top = False)
