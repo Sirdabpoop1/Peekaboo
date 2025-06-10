@@ -67,7 +67,7 @@ class FaceTracker(Model):
 
 def load_image(x):
     byte_img = tf.io.read_file(x)
-    img = tf.io.decode_jpeg(byte_img)
+    img = tf.io.decode_jpeg(byte_img, channels = 3)
     return img
 
 def load_labels(label_path):
@@ -209,8 +209,6 @@ model.compile(opt=opt, classloss=classloss, localizationloss=regressloss)
 logdir = 'logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = logdir)
 
-hist = model.fit(train, epochs = 40, validation_data = val, callbacks = [tensorboard_callback])
+hist = model.fit(train.take(100), epochs = 10, validation_data = val, callbacks = [tensorboard_callback])
 
 facetracker.save('facetracker.h5')
-
-facetracker = load_model('facetracker.h5')
