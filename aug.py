@@ -16,7 +16,7 @@ augmentor = alb.Compose([alb.RandomCrop(width = 450, height = 450),
                         bbox_params = alb.BboxParams(format = 'albumentations',
                                                       label_fields = ['class_labels']))
 
-for partition in ['train']:
+for partition in ['train', 'test', 'val']:
     for image in os.listdir(os.path.join('data', partition, 'images')):
         img = cv2.imread(os.path.join('data', partition, 'images', image))
         
