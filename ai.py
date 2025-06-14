@@ -164,21 +164,6 @@ val = val.prefetch(4)
 data_samples = train.as_numpy_iterator()
 res = data_samples.next()
 
-# fig, ax = plt.subplots(ncols = 4, figsize = (20,20))
-# for idx in range (4):
-#     sample_image = res[0][idx].copy()
-#     sample_coords = res[1][1][idx]
-
-#     cv2.rectangle(sample_image,
-#                   tuple(np.multiply(sample_coords[:2], [120, 120]).astype(int)),
-#                   tuple(np.multiply(sample_coords[2:], [120, 120]).astype(int)),
-#                         (255, 0, 0), 2)
-    
-#     ax[idx].imshow(sample_image)
-
-# plt.show()
-
-
 vgg = VGG16(include_top = False)
 
 facetracker = build_model()
@@ -209,6 +194,25 @@ model.compile(opt=opt, classloss=classloss, localizationloss=regressloss)
 logdir = 'logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = logdir)
 
-hist = model.fit(train.take(100), epochs = 10, validation_data = val, callbacks = [tensorboard_callback])
+hist = model.fit(train, epochs = 40, validation_data = val, callbacks = [tensorboard_callback])
 
 facetracker.save('facetracker.h5')
+
+fig, ax = plt.subplots(ncols=3, figsize=(20,5))
+
+ax[0].plot(hist.history['total loss'], color='teal', label='loss')
+ax[0].plot(hist.history['val_total loss'], color='orange', label='val loss')
+ax[0].title.set_text('Loss')
+ax[0].legend()
+
+ax[1].plot(hist.history['class_loss'], color='teal', label='class loss')
+ax[1].plot(hist.history['val_class_loss'], color='orange', label='val class loss')
+ax[1].title.set_text('Classification Loss')
+ax[1].legend()
+
+ax[2].plot(hist.history['regress_loss'], color='teal', label='regress loss')
+ax[2].plot(hist.history['val_regress_loss'], color='orange', label='val regress loss')
+ax[2].title.set_text('Regression Loss')
+ax[2].legend()
+
+plt.show()
