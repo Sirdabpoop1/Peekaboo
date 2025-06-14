@@ -42,7 +42,7 @@ class FaceTracker(Model):
             batch_classloss = self.closs(y[0], classes)
             batch_localizationloss = self.lloss(tf.cast(y[1], tf.float32), coords)
 
-            total_loss = batch_localizationloss + 0.5*batch_classloss
+            total_loss = batch_localizationloss + 0.2 * batch_classloss
 
             grad = tape.gradient(total_loss, self.model.trainable_variables)
         
@@ -164,7 +164,10 @@ val = val.prefetch(4)
 data_samples = train.as_numpy_iterator()
 res = data_samples.next()
 
-vgg = VGG16(include_top = False)
+vgg = VGG16(include_top=False)
+
+for layer in vgg.layers:
+    layer.trainable = False
 
 facetracker = build_model()
 
