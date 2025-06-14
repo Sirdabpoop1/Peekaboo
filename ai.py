@@ -48,7 +48,7 @@ class FaceTracker(Model):
         
         self.opt.apply_gradients(zip(grad, self.model.trainable_variables))
 
-        return {"total_loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
+        return {"total loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
     
     def test_step(self, batch, **kwargs):
         X, y = batch
@@ -60,7 +60,7 @@ class FaceTracker(Model):
 
         total_loss = batch_localizationloss + 0.5*batch_classloss
 
-        return {"total_loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
+        return {"total loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
     
     def call(self, X, **kwargs):
         return self.model(X, **kwargs)
@@ -73,20 +73,8 @@ def load_image(x):
 def load_labels(label_path):
     with open(label_path.numpy(), 'r', encoding = "utf-8") as f:
         label = json.load(f)
-
-    if 'class' in label:  # Augmented format
-        return [label['class']], label['bbox']
-    elif 'shapes' in label:  # Original label format
-        coords = [0, 0, 0.00001, 0.00001]  # Default small box
-        coords[0] = label['shapes'][0]['points'][0][0]
-        coords[1] = label['shapes'][0]['points'][0][1]
-        coords[2] = label['shapes'][0]['points'][1][0]
-        coords[3] = label['shapes'][0]['points'][1][1]
-        coords = list(np.divide(coords, [640, 480, 640, 480]))
-        return [1], coords  # Always assume 1 for val/test
-    else:
-        return [0], [0, 0, 0, 0]  # fallback
-
+    
+    return [label['class']], label['bbox']
 
 def set_shapes(class_tensor, bbox_tensor):
     class_tensor.set_shape([1])
@@ -136,12 +124,12 @@ train_images = train_images.map(load_image)
 train_images = train_images.map(lambda x: tf.image.resize(x, (120, 120)))
 train_images = train_images.map(lambda x: x/225)
 
-test_images = tf.data.Dataset.list_files('data\\test\\images\\*.jpg', shuffle = False)
+test_images = tf.data.Dataset.list_files('aug_data\\test\\images\\*.jpg', shuffle = False)
 test_images = test_images.map(load_image)
 test_images = test_images.map(lambda x: tf.image.resize(x, (120, 120)))
 test_images = test_images.map(lambda x: x/225)
 
-val_images = tf.data.Dataset.list_files('data\\val\\images\\*.jpg', shuffle = False)
+val_images = tf.data.Dataset.list_files('aug_data\\val\\images\\*.jpg', shuffle = False)
 val_images = val_images.map(load_image)
 val_images = val_images.map(lambda x: tf.image.resize(x, (120, 120)))
 val_images = val_images.map(lambda x: x/225)
@@ -150,11 +138,11 @@ train_labels = tf.data.Dataset.list_files('aug_data\\train\\labels\\*.json', shu
 train_labels = train_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 train_labels = train_labels.map(set_shapes)
 
-test_labels = tf.data.Dataset.list_files('data\\test\\labels\\*.json', shuffle = False)
+test_labels = tf.data.Dataset.list_files('aug_data\\test\\labels\\*.json', shuffle = False)
 test_labels = test_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 test_labels = test_labels.map(set_shapes)
 
-val_labels = tf.data.Dataset.list_files('data\\val\\labels\\*.json', shuffle = False)
+val_labels = tf.data.Dataset.list_files('aug_data\\val\\labels\\*.json', shuffle = False)
 val_labels = val_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 val_labels = val_labels.map(set_shapes)
 
@@ -209,27 +197,14 @@ model.compile(opt=opt, classloss=classloss, localizationloss=regressloss)
 logdir = 'logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = logdir)
 
-early_stop = tf.keras.callbacks.EarlyStopping(
-    monitor='val_total_loss',
-    patience=2,
-    restore_best_weights=True,
-    mode='min'
-)
-
-hist = model.fit(
-    train,
-    epochs=40,
-    validation_data=val,
-    callbacks=[tensorboard_callback, early_stop]
-)
-
+hist = model.fit(train, epochs = 40, validation_data = val, callbacks = [tensorboard_callback])
 
 facetracker.save('facetracker.h5')
 
 fig, ax = plt.subplots(ncols=3, figsize=(20,5))
 
-ax[0].plot(hist.history['total_loss'], color='teal', label='loss')
-ax[0].plot(hist.history['val_total_loss'], color='orange', label='val loss')
+ax[0].plot(hist.history['total loss'], color='teal', label='loss')
+ax[0].plot(hist.history['val_total loss'], color='orange', label='val loss')
 ax[0].title.set_text('Loss')
 ax[0].legend()
 
