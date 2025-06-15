@@ -48,7 +48,7 @@ class FaceTracker(Model):
         
         self.opt.apply_gradients(zip(grad, self.model.trainable_variables))
 
-        return {"total loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
+        return {"total_loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
     
     def test_step(self, batch, **kwargs):
         X, y = batch
@@ -60,7 +60,7 @@ class FaceTracker(Model):
 
         total_loss = batch_localizationloss + 0.5*batch_classloss
 
-        return {"total loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
+        return {"total_loss": total_loss, "class_loss": batch_classloss, "regress_loss": batch_localizationloss}
     
     def call(self, X, **kwargs):
         return self.model(X, **kwargs)
@@ -200,8 +200,8 @@ facetracker.save('facetracker.h5')
 
 fig, ax = plt.subplots(ncols=3, figsize=(20,5))
 
-ax[0].plot(hist.history['total loss'], color='teal', label='loss')
-ax[0].plot(hist.history['val_total loss'], color='orange', label='val loss')
+ax[0].plot(hist.history['total_loss'], color='teal', label='loss')
+ax[0].plot(hist.history['val_total_loss'], color='orange', label='val loss')
 ax[0].title.set_text('Loss')
 ax[0].legend()
 
