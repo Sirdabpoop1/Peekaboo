@@ -1,12 +1,17 @@
-import cv2
+import os
+import json
 
-cap = cv2.VideoCapture(0)
-if cap.isOpened():
-    ret, frame = cap.read()
-    if ret:
-        cv2.imshow("Webcam Test", frame)
-        cv2.waitKey(1000)  # Show frame for 1 second
-    cap.release()
-    cv2.destroyAllWindows()
-else:
-    print("❌ Could not access webcam.")
+label_dir = 'data/val/labels'
+
+for filename in os.listdir(label_dir):
+    if filename.endswith('.json'):
+        path = os.path.join(label_dir, filename)
+        with open(path, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                if 'class' not in data:
+                    print(f"Missing 'class' in {filename}")
+                if 'bbox' not in data:
+                    print(f"Missing 'bbox' in {filename}")
+            except json.JSONDecodeError:
+                print(f"Invalid JSON in {filename}")

@@ -73,8 +73,19 @@ def load_image(x):
 def load_labels(label_path):
     with open(label_path.numpy(), 'r', encoding = "utf-8") as f:
         label = json.load(f)
-    
-    return [label['class']], label['bbox']
+
+    if 'class' in label:  # Augmented format
+        return [label['class']], label['bbox']
+    elif 'shapes' in label:  # Original label format
+        coords = [0, 0, 0.00001, 0.00001]  # Default small box
+        coords[0] = label['shapes'][0]['points'][0][0]
+        coords[1] = label['shapes'][0]['points'][0][1]
+        coords[2] = label['shapes'][0]['points'][1][0]
+        coords[3] = label['shapes'][0]['points'][1][1]
+        coords = list(np.divide(coords, [640, 480, 640, 480]))
+        return [1], coords  # Always assume 1 for val/test
+    else:
+        return [0], [0, 0, 0, 0]
 
 def set_shapes(class_tensor, bbox_tensor):
     class_tensor.set_shape([1])
@@ -124,12 +135,12 @@ train_images = train_images.map(load_image)
 train_images = train_images.map(lambda x: tf.image.resize(x, (120, 120)))
 train_images = train_images.map(lambda x: x/225)
 
-test_images = tf.data.Dataset.list_files('aug_data\\test\\images\\*.jpg', shuffle = False)
+test_images = tf.data.Dataset.list_files('data\\test\\images\\*.jpg', shuffle = False)
 test_images = test_images.map(load_image)
 test_images = test_images.map(lambda x: tf.image.resize(x, (120, 120)))
 test_images = test_images.map(lambda x: x/225)
 
-val_images = tf.data.Dataset.list_files('aug_data\\val\\images\\*.jpg', shuffle = False)
+val_images = tf.data.Dataset.list_files('data\\val\\images\\*.jpg', shuffle = False)
 val_images = val_images.map(load_image)
 val_images = val_images.map(lambda x: tf.image.resize(x, (120, 120)))
 val_images = val_images.map(lambda x: x/225)
@@ -138,11 +149,11 @@ train_labels = tf.data.Dataset.list_files('aug_data\\train\\labels\\*.json', shu
 train_labels = train_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 train_labels = train_labels.map(set_shapes)
 
-test_labels = tf.data.Dataset.list_files('aug_data\\test\\labels\\*.json', shuffle = False)
+test_labels = tf.data.Dataset.list_files('data\\test\\labels\\*.json', shuffle = False)
 test_labels = test_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 test_labels = test_labels.map(set_shapes)
 
-val_labels = tf.data.Dataset.list_files('aug_data\\val\\labels\\*.json', shuffle = False)
+val_labels = tf.data.Dataset.list_files('data\\val\\labels\\*.json', shuffle = False)
 val_labels = val_labels.map(lambda x: tf.py_function(load_labels, [x], (tf.uint8, tf.float32)))
 val_labels = val_labels.map(set_shapes)
 
