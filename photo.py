@@ -3,8 +3,8 @@ import time
 import uuid
 import cv2
 
-IMAGES_PATH = os.path.join('data', 'val', 'labels')
-number_images = 13
+IMAGES_PATH = os.path.join('data', 'train', 'labels')
+number_images = 12
 
 cap = cv2.VideoCapture(0)
 
