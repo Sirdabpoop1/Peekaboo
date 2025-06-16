@@ -3,5 +3,4 @@ numpy
 matplotlib
 tensorflow
 albumentations
-opencv-python
 keyboard
