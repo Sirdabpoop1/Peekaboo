@@ -1,6 +1,4 @@
-opencv-python
-numpy
-matplotlib
-tensorflow
-albumentations
-keyboard
+opencv-python==4.11.0.86
+numpy==1.26.4
+matplotlib==3.10.3
+tensorflow==2.19.0
