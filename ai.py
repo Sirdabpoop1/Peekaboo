@@ -205,7 +205,7 @@ model.compile(opt=opt, classloss=classloss, localizationloss=regressloss)
 logdir = 'logs'
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = logdir)
 
-hist = model.fit(train, epochs = 40, validation_data = val, callbacks = [tensorboard_callback])
+hist = model.fit(train, epochs = 20, validation_data = val, callbacks = [tensorboard_callback])
 
 facetracker.save('facetracker.h5')
 
